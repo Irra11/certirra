@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irra Esign | iOS Certificate Checkout</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #1b75bb;
+            --primary-light: #e1f0ff;
+            --success: #00d285;
+            --bg-dot: #e5e7eb;
+            --text-main: #2d3748;
+            --text-gray: #718096;
+            --terminal-bg: #1e293b;
+            --border-color: #e2e8f0;
+        }
+
+        /* Background Pattern */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body {
+            background-color: #f8fafc;
+            background-image: radial-gradient(var(--bg-dot) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Navigation */
+        .navbar {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-logo { font-weight: 800; font-size: 20px; color: #1a365d; }
+        .contact-btn {
+            background: var(--primary-light);
+            color: #0088cc;
+            padding: 10px 18px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        .contact-btn:hover { opacity: 0.8; }
+
+        /* Main Card */
+        .card {
+            background: white;
+            width: 95%;
+            max-width: 480px;
+            border-radius: 28px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+            padding: 40px 35px;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+        }
+
+        .logo-circle {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-style: italic;
+            font-weight: 800;
+            font-size: 22px;
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .card h1 { font-weight: 800; font-size: 24px; color: #1a202c; }
+        .subtitle { color: var(--text-gray); font-size: 15px; margin-bottom: 25px; }
+
+        /* Features */
+        .features-list {
+            border: 1px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        .feature-item i { color: var(--success); font-size: 16px; }
+
+        /* Price Row */
+        .price-box {
+            background: #f8fafc;
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            padding: 18px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .price-label { font-size: 18px; color: #4a5568; font-weight: 500; }
+        .price-value { font-size: 26px; font-weight: 900; color: #1a365d; }
+
+        /* Inputs */
+        .input-label { text-align: left; font-size: 12px; font-weight: 700; color: #4a5568; margin-bottom: 8px; text-transform: uppercase; }
+        .input-container { position: relative; margin-bottom: 20px; }
+        .input-container i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #a0aec0; }
+        .input-container input {
+            width: 100%;
+            padding: 15px 15px 15px 48px;
+            border-radius: 14px;
+            border: 1.5px solid var(--border-color);
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        .input-container input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(27, 117, 187, 0.1); }
+
+        /* Terminal Box */
+        .terminal {
+            background: var(--terminal-bg);
+            border-radius: 14px;
+            padding: 18px;
+            text-align: left;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .terminal-icon { color: #38bdf8; font-size: 20px; }
+        .terminal-content { flex: 1; }
+        .terminal-title { color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
+        .terminal-body { color: white; font-family: 'Courier New', monospace; font-size: 14px; word-break: break-all; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #475569; }
+
+        /* Checkbox Khmer */
+        .terms {
+            display: flex;
+            gap: 12px;
+            text-align: left;
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+        .terms input { width: 22px; height: 22px; accent-color: var(--primary); cursor: pointer; }
+        .terms p { font-size: 12.5px; color: var(--text-gray); line-height: 1.6; }
+
+        /* Buttons */
+        .btn-main {
+            width: 100%;
+            background: #cbd5e0;
+            color: #718096;
+            padding: 18px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: not-allowed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+        .btn-main.active {
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 10px 15px -3px rgba(27, 117, 187, 0.4);
+        }
+        .btn-main.active:hover { transform: translateY(-2px); }
+
+        /* Modals */
+        .modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px);
+            justify-content: center; align-items: center; z-index: 1000; padding: 20px;
+        }
+        .modal.active { display: flex; }
+        .modal-card { background: white; padding: 35px; border-radius: 24px; width: 100%; max-width: 420px; text-align: center; }
+
+        /* File Upload Area */
+        .upload-zone {
+            border: 2px dashed var(--border-color);
+            padding: 25px;
+            border-radius: 16px;
+            background: #f8fafc;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .upload-zone:hover { border-color: var(--primary); background: var(--primary-light); }
+        .upload-zone i { font-size: 30px; color: var(--primary); margin-bottom: 10px; }
+
+        footer { margin-top: auto; padding: 30px; text-align: center; font-size: 13px; color: var(--text-gray); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-logo">Irra Esign</div>
+        <a href="https://t.me/yourusername" target="_blank" class="contact-btn">
+            <i class="fab fa-telegram-plane"></i> Contact Admin
+        </a>
+    </nav>
+
+    <div class="card">
+        <div class="logo-circle">E-Sign</div>
+        <h1>Certificate</h1>
+        <p class="subtitle">P12 & Mobileprovision</p>
+
+        <div class="features-list">
+            <div class="feature-item"><i class="fas fa-check-circle"></i> Valid for 1 Year (365 Days)</div>
+            <div class="feature-item"><i class="fas fa-check-circle"></i> 30 Days Revoke Warranty</div>
+            <div class="feature-item"><i class="fas fa-check-circle"></i> Instant Delivery via Email</div>
+        </div>
+
+        <div class="price-box">
+            <span class="price-label">តម្លៃ</span>
+            <span class="price-value">$10.00</span>
+        </div>
+
+        <p class="input-label">Device UDID</p>
+        <div class="input-container">
+            <i class="fas fa-fingerprint"></i>
+            <input type="text" id="udidInput" placeholder="Paste UDID here..." oninput="syncTerminal(this.value)">
+        </div>
+
+        <div class="terminal">
+            <i class="fas fa-terminal terminal-icon"></i>
+            <div class="terminal-content">
+                <p class="terminal-title">Detected UDID</p>
+                <p class="terminal-body" id="termText">Waiting for input...</p>
+            </div>
+            <div class="status-dot" id="termDot"></div>
+        </div>
+
+        <label class="terms">
+            <input type="checkbox" id="termsCheck" onchange="validateForm()">
+            <p>ខ្ញុំសូមបញ្ជាក់ថា UDID នេះពិតជាត្រឹមត្រូវ។ ខ្ញុំយល់ថា (Certificates) គឺត្រូវបានភ្ជាប់ជាមួយ UDID នេះ ហើយមិនអាចប្តូរប្រាក់វិញបានទេ។</p>
+        </label>
+
+        <button class="btn-main" id="payBtn" onclick="showEmailModal()">
+            Pay with KHQR <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <!-- Modal 1: Email -->
+    <div id="emailModal" class="modal">
+        <div class="modal-card">
+            <h2>Recipient Email</h2>
+            <p style="color: var(--text-gray); margin: 10px 0 25px; font-size: 14px;">Where should we send your certificate?</p>
+            <div class="input-container" style="text-align: left;">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="emailInput" placeholder="example@gmail.com">
+            </div>
+            <button class="btn-main active" onclick="showQRModal()">Next Step</button>
+            <button onclick="closeModals()" style="margin-top:15px; background:none; border:none; color:#a0aec0; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Modal 2: QR & Upload -->
+    <div id="qrModal" class="modal">
+        <div class="modal-card">
+            <h3>Scan KHQR to Pay</h3>
+            <p style="font-size: 18px; font-weight: 700; margin: 10px 0;">Amount: $10.00</p>
+            
+            <img src="https://i.pinimg.com/736x/e5/fd/31/e5fd3186e185c6d235f024103d091c37.jpg" 
+                 style="width: 200px; border-radius: 12px; margin: 10px 0; border: 1px solid #eee;">
+
+            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <p id="fileStatus" style="font-size: 13px; color: var(--text-gray);">Upload Transaction Receipt</p>
+                <input type="file" id="fileInput" hidden accept="image/*" onchange="updateFileLabel(this)">
+            </div>
+
+            <button class="btn-main active" id="submitAll" style="background: var(--success);" onclick="finalizeOrder()">
+                Confirm & Submit Proof
+            </button>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 <b>Irra Esign</b>. All rights reserved.</p>
+        <div style="margin-top: 8px;">
+            <a href="#" style="color: var(--primary); text-decoration: none;">Terms</a> • 
+            <a href="#" style="color: var(--primary); text-decoration: none;">Privacy</a>
+        </div>
+    </footer>
+
+    <script>
+        // 1. Live UDID Terminal Logic
+        function syncTerminal(val) {
+            const text = document.getElementById('termText');
+            const dot = document.getElementById('termDot');
+            if(val.length > 5) {
+                text.innerText = val;
+                text.style.color = "#38bdf8";
+                dot.style.background = "#00d285";
+                dot.style.boxShadow = "0 0 8px #00d285";
+            } else {
+                text.innerText = "Waiting for input...";
+                text.style.color = "white";
+                dot.style.background = "#475569";
+                dot.style.boxShadow = "none";
+            }
+            validateForm();
+        }
+
+        // 2. Button Activation Logic
+        function validateForm() {
+            const udid = document.getElementById('udidInput').value;
+            const checked = document.getElementById('termsCheck').checked;
+            const btn = document.getElementById('payBtn');
+            if(udid.length > 10 && checked) {
+                btn.classList.add('active');
+                btn.style.cursor = "pointer";
+            } else {
+                btn.classList.remove('active');
+                btn.style.cursor = "not-allowed";
+            }
+        }
+
+        // 3. Modal Navigation
+        function showEmailModal() {
+            if(!document.getElementById('payBtn').classList.contains('active')) return;
+            document.getElementById('emailModal').classList.add('active');
+        }
+
+        function showQRModal() {
+            const email = document.getElementById('emailInput').value;
+            if(!email.includes('@')) return alert("Please enter a valid email address");
+            document.getElementById('emailModal').classList.remove('active');
+            document.getElementById('qrModal').classList.add('active');
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+        }
+
+        // 4. File Upload Label
+        function updateFileLabel(input) {
+            const label = document.getElementById('fileStatus');
+            if(input.files.length > 0) {
+                label.innerText = "📄 " + input.files[0].name;
+                label.style.color = "#1b75bb";
+                label.style.fontWeight = "bold";
+            }
+        }
+
+        // 5. Final API Submission
+        async function finalizeOrder() {
+            const file = document.getElementById('fileInput').files[0];
+            if(!file) return alert("Please upload your payment receipt image!");
+
+            const btn = document.getElementById('submitAll');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            const formData = new FormData();
+            formData.append('udid', document.getElementById('udidInput').value);
+            formData.append('email', document.getElementById('emailInput').value);
+            formData.append('receipt', file);
+
+            try {
+                // Change URL to your Python Backend
+                const response = await fetch('http://127.0.0.1:5000/verify-payment', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if(response.ok) {
+                    alert("✅ Success! Your order has been submitted for review.");
+                    location.reload();
+                } else {
+                    alert("❌ Server error. Please try again later.");
+                    btn.disabled = false;
+                    btn.innerText = "Confirm & Submit Proof";
+                }
+            } catch (err) {
+                // If backend is not running, simulate success for UI demo
+                alert("Order recorded (Local Demo Mode).");
+                location.reload();
+            }
+        }
+    </script>
+
+</body>
+</html>
