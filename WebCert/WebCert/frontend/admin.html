@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Irra Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --sidebar: #1e1e2d; --main: #f4f7fe; --purple: #8e54e9; --text: #2b3674; --sec: #a3aed0; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; }
+        body { background: var(--main); display: flex; }
+        aside { width: 260px; background: var(--sidebar); height: 100vh; position: fixed; color: white; padding: 40px 25px; }
+        main { margin-left: 260px; padding: 50px; width: 100%; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
+        .s-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .table-box { background: white; padding: 35px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; color: var(--sec); font-size: 12px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        td { padding: 15px 0; border-bottom: 1px solid #f8f9fa; font-size: 14px; color: var(--text); }
+        .badge { padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+        .completed { background: #e6faf5; color: #05cd99; }
+        .pending { background: #fff8ed; color: #ffb547; }
+        .btn-act { width: 32px; height: 32px; border-radius: 8px; border:none; cursor:pointer; margin-right:5px; }
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; }
+        .modal.active { display:flex; }
+        .m-card { background:white; width:380px; padding:30px; border-radius:20px; }
+    </style>
+</head>
+<body>
+    <aside><h2 style="color:var(--purple)">Irra Admin</h2></aside>
+    <main>
+        <div class="stats">
+            <div class="s-card"><p>Orders</p><h2 id="st-total">0</h2></div>
+            <div class="s-card"><p>Done</p><h2 id="st-done" style="color:#05cd99">0</h2></div>
+            <div class="s-card"><p>Pending</p><h2 id="st-pen" style="color:#ffb547">0</h2></div>
+            <div class="s-card"><p>Revenue</p><h2 id="st-rev">$0</h2></div>
+        </div>
+        <div class="table-box">
+            <h3>Recent Activity</h3>
+            <table>
+                <thead><tr><th>Customer</th><th>UDID</th><th>Status</th><th>Receipt</th><th>Actions</th></tr></thead>
+                <tbody id="t-body"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="editModal" class="modal"><div class="m-card">
+        <h3>Deliver Certificate</h3>
+        <input type="text" id="linkIn" placeholder="Paste Link Here..." style="width:100%; padding:12px; margin:20px 0; border-radius:10px; border:1px solid #ddd;">
+        <input type="hidden" id="activeId">
+        <button onclick="saveLink()" style="width:100%; padding:12px; background:var(--purple); color:white; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Update Order</button>
+        <p onclick="document.getElementById('editModal').classList.remove('active')" style="text-align:center; margin-top:20px; cursor:pointer; color:var(--sec);">Cancel</p>
+    </div></div>
+
+    <script>
+        const API = "http://127.0.0.1:5000";
+
+        async function load() {
+            try {
+                const res = await fetch(API + '/api/orders'); 
+                const data = await res.json();
+                const body = document.getElementById('t-body'); body.innerHTML = '';
+                let total = 0, done = 0, pen = 0;
+                Object.values(data).reverse().forEach(o => {
+                    total++; if(o.status === 'completed') done++; else pen++;
+                    body.innerHTML += `<tr>
+                        <td><b>@${o.email.split('@')[0]}</b></td>
+                        <td style="font-family:monospace">${o.udid.slice(0,10)}...</td>
+                        <td><span class="badge ${o.status}">${o.status.toUpperCase()}</span></td>
+                        <td><button class="btn-act" onclick="window.open('${API}${o.receipt_url}')" style="background:#fff0f0; color:#ff4d4d;"><i class="fas fa-image"></i></button></td>
+                        <td>
+                            <button class="btn-act" onclick="openM('${o.order_id}','${o.download_link||''}')" style="background:#f4f0ff; color:var(--purple);"><i class="fas fa-edit"></i></button>
+                            <button class="btn-act" onclick="sendGmail('${o.order_id}')" style="background:#eefbff; color:#0088ff;"><i class="fas fa-envelope"></i></button>
+                        </td></tr>`;
+                });
+                document.getElementById('st-total').innerText = total; 
+                document.getElementById('st-done').innerText = done;
+                document.getElementById('st-pen').innerText = pen; 
+                document.getElementById('st-rev').innerText = `$${done * 10}`;
+            } catch(e) { console.log(e) }
+        }
+
+        function openM(id, l) { 
+            document.getElementById('activeId').value = id; 
+            document.getElementById('linkIn').value = l; 
+            document.getElementById('editModal').classList.add('active'); 
+        }
+
+        async function saveLink() {
+            const id = document.getElementById('activeId').value;
+            const l = document.getElementById('linkIn').value;
+            await fetch(API + '/api/send-link', { 
+                method:'POST', 
+                headers:{'Content-Type':'application/json'}, 
+                body:JSON.stringify({order_id:id, link:l}) 
+            });
+            document.getElementById('editModal').classList.remove('active'); load();
+        }
+
+        async function sendGmail(id) {
+            const res = await fetch(API + '/api/send-email', { 
+                method:'POST', 
+                headers:{'Content-Type':'application/json'}, 
+                body:JSON.stringify({order_id:id}) 
+            });
+            if(res.ok) alert("✅ Gmail Sent!");
+            else alert("❌ Error: Need link first!");
+        }
+
+        setInterval(load, 5000); load();
+    </script>
+</body>
+</html>
